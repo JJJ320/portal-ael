@@ -1,5 +1,10 @@
-import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "./firebase";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 
 export type Cargo = "aluno" | "lider" | "funcionario";
 
@@ -8,18 +13,15 @@ export type UserData = {
   nome: string;
   email: string;
   foto: string;
+  bio: string;
   cargo: Cargo | null;
   verificado: boolean;
 };
 
-// CRIAR USUÁRIO (login)
 export async function createUser(data: UserData) {
-  const ref = doc(db, "users", data.uid);
-
-  await setDoc(ref, data);
+  await setDoc(doc(db, "users", data.uid), data);
 }
 
-// PEGAR USUÁRIO
 export async function getUser(uid: string) {
   const ref = doc(db, "users", uid);
   const snap = await getDoc(ref);
@@ -27,10 +29,17 @@ export async function getUser(uid: string) {
   return snap.exists() ? (snap.data() as UserData) : null;
 }
 
-// ATUALIZAR USUÁRIO (SEM ERRO)
-export async function updateUser(uid: string, data: Partial<UserData>) {
+export async function updateUser(
+  uid: string,
+  data: Partial<UserData>
+) {
   const ref = doc(db, "users", uid);
 
-  // cria se não existir, atualiza se existir
-  await setDoc(ref, data, { merge: true });
+  const snap = await getDoc(ref);
+
+  if (!snap.exists()) {
+    throw new Error("Usuário não existe no Firestore");
+  }
+
+  await updateDoc(ref, data);
 }
