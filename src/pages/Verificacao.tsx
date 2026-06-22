@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../services/firebase";
 import { updateUser } from "../services/firestoreUser";
 
+type Cargo = "aluno" | "lider" | "funcionario";
+
 export default function Verificacao() {
   const [codigo, setCodigo] = useState("");
   const [erro, setErro] = useState("");
@@ -10,33 +12,32 @@ export default function Verificacao() {
 
   const navigate = useNavigate();
 
-  const CODIGO_ALUNO = "7A-2026";
-  const CODIGO_LIDER = "LIDER-AEL";
-  const CODIGO_FUNCIONARIO = "ESCOLA-ADMIN";
+  const CODIGOS: Record<string, Cargo> = {
+    "7A-2026": "aluno",
+    "LIDER-AEL": "lider",
+    "ESCOLA-ADMIN": "funcionario",
+  };
 
   const handleVerificar = async () => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      setErro("Usuário não autenticado");
+      return;
+    }
+
+    setLoading(true);
+    setErro("");
+
+    const cargo = CODIGOS[codigo]; // aqui já é Cargo | undefined
+
+    if (!cargo) {
+      setErro("Código inválido");
+      setLoading(false);
+      return;
+    }
+
     try {
-      setLoading(true);
-      setErro("");
-
-      const user = auth.currentUser;
-
-      if (!user) {
-        setErro("Usuário não autenticado");
-        return;
-      }
-
-      let cargo: "aluno" | "lider" | "funcionario" | null = null;
-
-      if (codigo === CODIGO_ALUNO) cargo = "aluno";
-      if (codigo === CODIGO_LIDER) cargo = "lider";
-      if (codigo === CODIGO_FUNCIONARIO) cargo = "funcionario";
-
-      if (!cargo) {
-        setErro("Código inválido");
-        return;
-      }
-
       await updateUser(user.uid, {
         cargo,
         verificado: true,
@@ -45,7 +46,7 @@ export default function Verificacao() {
       navigate("/home");
     } catch (err) {
       console.error(err);
-      setErro("Erro ao verificar usuário");
+      setErro("Erro ao salvar verificação");
     } finally {
       setLoading(false);
     }

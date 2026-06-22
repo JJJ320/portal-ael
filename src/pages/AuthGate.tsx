@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthContext } from "../context/AuthContext";
 import { getUser } from "../services/firestoreUser";
@@ -6,7 +6,6 @@ import { getUser } from "../services/firestoreUser";
 export default function AuthGate() {
   const { user, loading } = useAuthContext();
   const navigate = useNavigate();
-  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     const check = async () => {
@@ -17,28 +16,28 @@ export default function AuthGate() {
         return;
       }
 
-      const dbUser = await getUser(user.uid);
+      const userData = await getUser(user.uid);
 
-      if (!dbUser) {
-        navigate("/verificacao");
+      if (!userData) {
+        navigate("/login");
         return;
       }
 
-      if (!dbUser.verificado) {
+      // 🔥 regra central
+      if (!userData.cargo) {
         navigate("/verificacao");
         return;
       }
 
       navigate("/home");
-      setChecking(false);
     };
 
     check();
-  }, [user, loading]);
+  }, [user, loading, navigate]);
 
   return (
-    <div style={{ textAlign: "center", marginTop: "80px" }}>
-      <h2>Carregando Portal AEL...</h2>
-    </div>
+    <h3 style={{ textAlign: "center", marginTop: "80px" }}>
+      Carregando sistema...
+    </h3>
   );
 }
