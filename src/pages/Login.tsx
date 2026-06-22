@@ -1,54 +1,49 @@
 import { useState } from "react";
 import { signInWithPopup } from "firebase/auth";
-import type { User } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { auth, provider } from "../services/firebase";
+import { createUser, getUser } from "../services/firestoreUser";
 
 export default function Login() {
-  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
+      setLoading(true);
+
       const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-      setUser(result.user);
+      const existingUser = await getUser(user.uid);
 
-      console.log("Usuário logado:", result.user);
+      if (!existingUser) {
+        await createUser({
+          uid: user.uid,
+          nome: user.displayName || "",
+          email: user.email || "",
+          foto: user.photoURL || "",
+          cargo: null,
+          verificado: false,
+        });
+      }
 
-      // vai para a tela de código AEL
-      navigate("/verificacao");
-    } catch (error) {
-      console.error("Erro no login:", error);
+      navigate("/");
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div
-      style={{
-        textAlign: "center",
-        marginTop: "60px",
-        fontFamily: "Arial",
-      }}
-    >
+    <div style={{ textAlign: "center", marginTop: "80px" }}>
       <h1>Portal AEL</h1>
       <p>Associação Estudantil Liberal</p>
 
-      {!user ? (
-        <button
-          onClick={handleLogin}
-          style={{
-            padding: "10px 20px",
-            cursor: "pointer",
-          }}
-        >
-          Entrar com Google
-        </button>
-      ) : (
-        <div>
-          <h3>Redirecionando...</h3>
-        </div>
-      )}
+      <button onClick={handleLogin} disabled={loading}>
+        {loading ? "Entrando..." : "Entrar com Google"}
+      </button>
     </div>
   );
 }

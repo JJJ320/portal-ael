@@ -5,29 +5,18 @@ import Verificacao from "../pages/Verificacao";
 import Home from "../pages/Home";
 
 import ProtectedRoute from "./ProtectedRoute";
+import AuthGate from "../pages/AuthGate";
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<AuthGate />} />
 
-        {/* rota padrão */}
-        <Route path="/" element={<Navigate to="/login" />} />
-
-        {/* login público */}
         <Route path="/login" element={<Login />} />
 
-        {/* verificação (precisa estar logado) */}
-        <Route
-          path="/verificacao"
-          element={
-            <ProtectedRoute>
-              <Verificacao />
-            </ProtectedRoute>
-          }
-        />
+<Route path="/verificacao" element={<Verificacao />} />
 
-        {/* home (precisa login + cargo válido) */}
         <Route
           path="/home"
           element={
@@ -37,9 +26,7 @@ export default function AppRoutes() {
           }
         />
 
-        {/* fallback (qualquer rota inválida volta pro login) */}
         <Route path="*" element={<Navigate to="/login" />} />
-
       </Routes>
     </BrowserRouter>
   );

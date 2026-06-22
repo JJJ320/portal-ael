@@ -1,22 +1,38 @@
 import { Navigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
-import { getUserCargo } from "../services/userService";
-import type { Cargo } from "../services/userService";
 import type { ReactElement } from "react";
+import { useEffect, useState } from "react";
+import { useAuthContext } from "../context/AuthContext";
+import { getUser, type Cargo } from "../services/firestoreUser";
 
 type Props = {
   children: ReactElement;
   allowedRoles?: Cargo[];
 };
 
-export default function ProtectedRoute({
-  children,
-  allowedRoles,
-}: Props) {
-  const { user, loading } = useAuth();
-  const cargo = getUserCargo();
+export default function ProtectedRoute({ children, allowedRoles }: Props) {
+  const { user, loading } = useAuthContext();
+  const [cargo, setCargo] = useState<Cargo | null>(null);
+  const [checking, setChecking] = useState(true);
 
-  if (loading) {
+  useEffect(() => {
+    const loadUser = async () => {
+      if (!user) {
+        setChecking(false);
+        return;
+      }
+
+      const data = await getUser(user.uid);
+
+      setCargo(data?.cargo ?? null);
+      setChecking(false);
+    };
+
+    if (!loading) {
+      loadUser();
+    }
+  }, [user, loading]);
+
+  if (loading || checking) {
     return <h3 style={{ textAlign: "center" }}>Carregando...</h3>;
   }
 

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { setUserCargo } from "../services/userService";
+import { auth } from "../services/firebase";
+import { updateUser } from "../services/firestoreUser";
 
 export default function Verificacao() {
   const [codigo, setCodigo] = useState("");
   const [erro, setErro] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -12,43 +14,57 @@ export default function Verificacao() {
   const CODIGO_LIDER = "LIDER-AEL";
   const CODIGO_FUNCIONARIO = "ESCOLA-ADMIN";
 
-  const verificarCodigo = () => {
-    if (codigo === CODIGO_ALUNO) {
-      setUserCargo("aluno");
-      navigate("/home");
-      return;
-    }
+  const handleVerificar = async () => {
+    try {
+      setLoading(true);
+      setErro("");
 
-    if (codigo === CODIGO_LIDER) {
-      setUserCargo("lider");
-      navigate("/home");
-      return;
-    }
+      const user = auth.currentUser;
 
-    if (codigo === CODIGO_FUNCIONARIO) {
-      setUserCargo("funcionario");
-      navigate("/home");
-      return;
-    }
+      if (!user) {
+        setErro("Usuário não autenticado");
+        return;
+      }
 
-    setErro("Código inválido");
+      let cargo: "aluno" | "lider" | "funcionario" | null = null;
+
+      if (codigo === CODIGO_ALUNO) cargo = "aluno";
+      if (codigo === CODIGO_LIDER) cargo = "lider";
+      if (codigo === CODIGO_FUNCIONARIO) cargo = "funcionario";
+
+      if (!cargo) {
+        setErro("Código inválido");
+        return;
+      }
+
+      await updateUser(user.uid, {
+        cargo,
+        verificado: true,
+      });
+
+      navigate("/home");
+    } catch (err) {
+      console.error(err);
+      setErro("Erro ao verificar usuário");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div style={{ textAlign: "center", marginTop: "80px" }}>
-      <h1>Portal AEL</h1>
-      <h3>Digite o código de acesso</h3>
+      <h1>Verificação AEL</h1>
 
       <input
         value={codigo}
         onChange={(e) => setCodigo(e.target.value)}
-        placeholder="Ex: 7A-2026"
+        placeholder="Digite o código"
       />
 
       <br /><br />
 
-      <button onClick={verificarCodigo}>
-        Entrar
+      <button onClick={handleVerificar} disabled={loading}>
+        {loading ? "Verificando..." : "Entrar"}
       </button>
 
       <p style={{ color: "red" }}>{erro}</p>
