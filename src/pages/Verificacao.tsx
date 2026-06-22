@@ -9,74 +9,50 @@ export default function Verificacao() {
 
   const navigate = useNavigate();
 
-  const CODIGOS = {
-    "7A-2026": "aluno",
-    "LIDER-AEL": "lider",
-    "ESCOLA-ADMIN": "funcionario",
-  } as const;
-
   const handleVerificar = async () => {
-    try {
-      const user = auth.currentUser;
+    const user = auth.currentUser;
 
-      if (!user) {
-        setErro("Usuário não autenticado");
-        return;
-      }
-
-      const cargo =
-        CODIGOS[codigo as keyof typeof CODIGOS];
-
-      if (!cargo) {
-        setErro("Código inválido");
-        return;
-      }
-
-      await updateUser(user.uid, {
-        cargo,
-        verificado: true,
-      });
-
-      navigate("/home");
-    } catch (err) {
-      console.error(err);
-      setErro("Erro ao verificar conta");
+    if (!user) {
+      setErro("Usuário não autenticado");
+      return;
     }
+
+    let cargo: "aluno" | "lider" | "funcionario" | null = null;
+
+    if (codigo === "7A-2026") cargo = "aluno";
+    if (codigo === "LIDER-AEL") cargo = "lider";
+    if (codigo === "ESCOLA-ADMIN") cargo = "funcionario";
+
+    if (!cargo) {
+      setErro("Código inválido");
+      return;
+    }
+
+    await updateUser(user.uid, {
+      cargo,
+      verificado: true,
+    });
+
+    navigate("/home");
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1>Verificação AEL</h1>
+    <div style={{ textAlign: "center", marginTop: "80px" }}>
+      <h1>Verificação AEL</h1>
 
-        <input
-          value={codigo}
-          onChange={(e) => setCodigo(e.target.value)}
-          placeholder="Digite o código"
-        />
+      <input
+        value={codigo}
+        onChange={(e) => setCodigo(e.target.value)}
+        placeholder="Digite o código"
+      />
 
-        <button onClick={handleVerificar}>
-          Entrar
-        </button>
+      <br /><br />
 
-        {erro && <p style={{ color: "red" }}>{erro}</p>}
-      </div>
+      <button onClick={handleVerificar}>
+        Entrar
+      </button>
+
+      <p style={{ color: "red" }}>{erro}</p>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    height: "100vh",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    background: "#0f0f1a",
-    color: "white",
-  },
-  card: {
-    padding: 40,
-    background: "#1a1a2e",
-    borderRadius: 12,
-  },
-};

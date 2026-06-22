@@ -4,10 +4,7 @@ export default function Home() {
   return (
     <div>
       <UserMenu />
-
-      <h1 style={{ color: "white" }}>
-        Bem-vindo ao Portal AEL
-      </h1>
+      <h1>Home</h1>
     </div>
   );
 }

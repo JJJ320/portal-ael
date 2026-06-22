@@ -1,10 +1,10 @@
-import { db } from "./firebase";
 import {
   doc,
   getDoc,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
+import { db } from "./firebase";
 
 export type Cargo = "aluno" | "lider" | "funcionario";
 
@@ -29,17 +29,7 @@ export async function getUser(uid: string) {
   return snap.exists() ? (snap.data() as UserData) : null;
 }
 
-export async function updateUser(
-  uid: string,
-  data: Partial<UserData>
-) {
+export async function updateUser(uid: string, data: Partial<UserData>) {
   const ref = doc(db, "users", uid);
-
-  const snap = await getDoc(ref);
-
-  if (!snap.exists()) {
-    throw new Error("Usuário não existe no Firestore");
-  }
-
   await updateDoc(ref, data);
 }

@@ -1,41 +1,47 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import type { User } from "firebase/auth";
 import { auth } from "../services/firebase";
+import { getUser } from "../services/firestoreUser";
 
-type AuthContextType = {
-  user: User | null;
-  loading: boolean;
-};
+const AuthContext = createContext<any>(null);
 
-const AuthContext = createContext<AuthContextType | null>(null);
-
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+export function AuthProvider({ children }: any) {
+  const [user, setUser] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const loadUserData = async (uid: string) => {
+    const data = await getUser(uid);
+    setUserData(data);
+  };
+
+  const refreshUser = async () => {
+    if (auth.currentUser) {
+      await loadUserData(auth.currentUser.uid);
+    }
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
+
+      if (u) {
+        await loadUserData(u.uid);
+      }
+
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => unsub();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider
+      value={{ user, userData, loading, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuthContext() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error("useAuthContext deve ser usado dentro do AuthProvider");
-  }
-
-  return context;
-}
+export const useAuthContext = () => useContext(AuthContext);
