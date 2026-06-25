@@ -1,10 +1,18 @@
-import UserMenu from "../components/UserMenu";
+import Header from "../components/Header";
 
 export default function Home() {
   return (
-    <div>
-      <UserMenu />
-      <h1>Home</h1>
-    </div>
+    <>
+      <Header />
+
+      <main
+        style={{
+          padding: "20px",
+          color: "white",
+        }}
+      >
+        <h1>Home</h1>
+      </main>
+    </>
   );
 }
