@@ -3,14 +3,21 @@ import Message from "./Message";
 import type { MessageProps } from "./Message";
 import { subscribeMessages } from "../../services/firestoreMessages";
 
-export default function MessageList() {
+type Props = {
+  channel: string;
+};
+
+export default function MessageList({ channel }: Props) {
   const [messages, setMessages] = useState<MessageProps[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const unsub = subscribeMessages(setMessages);
+    const unsub = subscribeMessages((msgs) => {
+      setMessages(msgs.filter((m) => m.channel === channel));
+    });
+
     return () => unsub();
-  }, []);
+  }, [channel]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

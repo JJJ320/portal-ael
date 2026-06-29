@@ -1,72 +1,57 @@
-import "../../styles/chat.css";
+import { useEffect, useState } from "react";
 
-export default function ChatSidebar() {
+import {
+  subscribeChannels,
+  createChannel,
+} from "../../services/firestoreChannels";
+
+import type { Channel } from "../../services/firestoreChannels";
+
+type Props = {
+  selected: string;
+  onSelect: (channel: string) => void;
+};
+
+export default function ChatSidebar({ selected, onSelect }: Props) {
+  const [channels, setChannels] = useState<Channel[]>([]);
+  const [newChannel, setNewChannel] = useState("");
+
+  useEffect(() => {
+    const unsub = subscribeChannels(setChannels);
+    return () => unsub();
+  }, []);
+
+  async function addChannel() {
+    if (!newChannel.trim()) return;
+
+    await createChannel(newChannel);
+    setNewChannel("");
+  }
+
   return (
-    <aside className="chat-sidebar">
+    <div className="chat-sidebar">
 
-      <div className="member-group">
-        <h4>ONLINE — 3</h4>
+      <h3>Canais</h3>
 
-        <div className="member">
-          <img
-            src="https://cdn.discordapp.com/embed/avatars/0.png"
-            alt=""
-          />
-
-          <span>João Gabriel</span>
-
-          <div className="status online"></div>
+      {channels.map((c) => (
+        <div
+          key={c.id}
+          className={`channel ${selected === c.name ? "active" : ""}`}
+          onClick={() => onSelect(c.name)}
+        >
+          # {c.name}
         </div>
+      ))}
 
-        <div className="member">
-          <img
-            src="https://cdn.discordapp.com/embed/avatars/1.png"
-            alt=""
-          />
-
-          <span>Líder AEL</span>
-
-          <div className="status online"></div>
-        </div>
-
-        <div className="member">
-          <img
-            src="https://cdn.discordapp.com/embed/avatars/2.png"
-            alt=""
-          />
-
-          <span>Funcionário</span>
-
-          <div className="status away"></div>
-        </div>
+      <div className="channel-create">
+        <input
+          value={newChannel}
+          onChange={(e) => setNewChannel(e.target.value)}
+          placeholder="novo canal"
+        />
+        <button onClick={addChannel}>+</button>
       </div>
 
-      <div className="member-group">
-        <h4>OFFLINE — 2</h4>
-
-        <div className="member offline">
-          <img
-            src="https://cdn.discordapp.com/embed/avatars/3.png"
-            alt=""
-          />
-
-          <span>Aluno 1</span>
-
-          <div className="status offline"></div>
-        </div>
-
-        <div className="member offline">
-          <img
-            src="https://cdn.discordapp.com/embed/avatars/4.png"
-            alt=""
-          />
-
-          <span>Aluno 2</span>
-
-          <div className="status offline"></div>
-        </div>
-      </div>
-
-    </aside>
+    </div>
   );
 }

@@ -1,21 +1,35 @@
+import { useState } from "react";
+import ChatSidebar from "./ChatSidebar";
+import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import ChatInput from "./ChatInput";
+
 import "../../styles/chat.css";
 
 export default function Chat() {
+  const [channel, setChannel] = useState("geral");
+
   return (
     <div className="chat-container">
 
-      {/* Área das mensagens */}
-      <div className="chat-messages">
-        <MessageList />
-      </div>
+      <ChatSidebar
+        selected={channel}
+        onSelect={setChannel}
+      />
 
-      {/* Área de input */}
-      <div className="chat-input-wrapper">
-        <ChatInput />
-      </div>
+      <div className="chat-main">
 
+        <ChatHeader channel={channel} />
+
+        <div className="chat-messages">
+          <MessageList channel={channel} />
+        </div>
+
+        <div className="chat-input-wrapper">
+          <ChatInput channel={channel} />
+        </div>
+
+      </div>
     </div>
   );
 }

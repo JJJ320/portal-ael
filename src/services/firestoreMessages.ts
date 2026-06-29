@@ -15,6 +15,7 @@ export type Message = {
   texto?: string;
   arquivo?: string;
   tipo?: string;
+  channel: string; // 🔥 FIX AQUI
 };
 
 export function sendMessage(data: Message) {

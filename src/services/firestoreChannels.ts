@@ -1,44 +1,32 @@
 import {
   collection,
   addDoc,
-  getDocs,
+  onSnapshot,
   query,
   orderBy,
-  serverTimestamp,
 } from "firebase/firestore";
-
 import { db } from "./firebase";
 
-export interface ChannelData {
+export type Channel = {
   id?: string;
-  nome: string;
-  descricao: string;
-  criadoEm?: any;
-}
+  name: string;
+};
 
-const channelsCollection = collection(db, "channels");
+export function subscribeChannels(callback: (channels: Channel[]) => void) {
+  const q = query(collection(db, "channels"), orderBy("name", "asc"));
 
-export async function createChannel(
-  nome: string,
-  descricao: string
-) {
-  await addDoc(channelsCollection, {
-    nome,
-    descricao,
-    criadoEm: serverTimestamp(),
+  return onSnapshot(q, (snapshot) => {
+    const channels = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Channel),
+    }));
+
+    callback(channels);
   });
 }
 
-export async function getChannels(): Promise<ChannelData[]> {
-  const q = query(
-    channelsCollection,
-    orderBy("nome")
-  );
-
-  const snapshot = await getDocs(q);
-
-  return snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...(doc.data() as Omit<ChannelData, "id">),
-  }));
+export function createChannel(name: string) {
+  return addDoc(collection(db, "channels"), {
+    name,
+  });
 }
