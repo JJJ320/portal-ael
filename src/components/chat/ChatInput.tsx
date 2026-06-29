@@ -1,14 +1,17 @@
 import { useState } from "react";
 import { sendMessage } from "../../services/firestoreMessages";
+import { useAuthContext } from "../../context/AuthContext";
 
 export default function ChatInput() {
   const [texto, setTexto] = useState("");
+  const { user } = useAuthContext();
 
   async function enviar() {
     if (!texto.trim()) return;
+    if (!user) return;
 
     await sendMessage({
-      nome: "Aluno",
+      nome: user.name || "Usuário",
       foto: "https://i.imgur.com/default.png",
       cargo: "Aluno",
       horario: Date.now(),
