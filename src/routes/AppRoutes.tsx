@@ -1,33 +1,35 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/Login";
-import Verificacao from "../pages/Verificacao";
 import Home from "../pages/Home";
+import Chat from "../pages/Chat";
 
 import ProtectedRoute from "./ProtectedRoute";
-import AuthGate from "../pages/AuthGate";
 
 export default function AppRoutes() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<AuthGate />} />
+    <Routes>
+      <Route path="/login" element={<Login />} />
 
-        <Route path="/login" element={<Login />} />
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
 
-<Route path="/verificacao" element={<Verificacao />} />
+      <Route
+        path="/chat"
+        element={
+          <ProtectedRoute>
+            <Chat />
+          </ProtectedRoute>
+        }
+      />
 
-        <Route
-          path="/home"
-          element={
-            <ProtectedRoute allowedRoles={["aluno", "lider", "funcionario"]}>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route path="*" element={<Navigate to="/login" />} />
-      </Routes>
-    </BrowserRouter>
+      <Route path="*" element={<Navigate to="/" />} />
+    </Routes>
   );
 }

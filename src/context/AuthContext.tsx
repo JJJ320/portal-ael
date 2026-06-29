@@ -1,28 +1,20 @@
 import {
   createContext,
+  useContext,
   useEffect,
   useState,
-  useContext,
+  type ReactNode,
 } from "react";
-
-import type { ReactNode } from "react";
 
 import {
   onAuthStateChanged,
+  type User,
 } from "firebase/auth";
-
-import type { User } from "firebase/auth";
 
 import { auth } from "../services/firebase";
 
-type UserData = {
-  uid: string;
-  email: string | null;
-  name?: string | null;
-};
-
 type AuthContextType = {
-  user: UserData | null;
+  user: User | null;
   loading: boolean;
 };
 
@@ -32,26 +24,14 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(
-      auth,
-      (firebaseUser: User | null) => {
-        if (firebaseUser) {
-          setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            name: firebaseUser.displayName,
-          });
-        } else {
-          setUser(null);
-        }
-
-        setLoading(false);
-      }
-    );
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+    });
 
     return () => unsub();
   }, []);
@@ -63,6 +43,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuthContext() {
+export function useAuth() {
   return useContext(AuthContext);
 }

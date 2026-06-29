@@ -1,44 +1,17 @@
 import { Navigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { useAuthContext } from "../context/AuthContext";
-import { getUser, type Cargo } from "../services/firestoreUser";
+import { useAuth } from "../context/AuthContext";
 
-type Props = {
-  children: React.ReactElement;
-  allowedRoles?: Cargo[];
-};
+export default function ProtectedRoute({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const { user, loading } = useAuth();
 
-export default function ProtectedRoute({ children, allowedRoles }: Props) {
-  const { user, loading } = useAuthContext();
-  const [cargo, setCargo] = useState<Cargo | null>(null);
-  const [checking, setChecking] = useState(true);
-
-  useEffect(() => {
-    const load = async () => {
-      if (!user) return;
-
-      const data = await getUser(user.uid);
-      setCargo(data?.cargo ?? null);
-      setChecking(false);
-    };
-
-    if (!loading) load();
-  }, [user, loading]);
-
-  if (loading || checking) {
-    return <h3 style={{ textAlign: "center" }}>Carregando...</h3>;
-  }
+  if (loading) return <div>Carregando...</div>;
 
   if (!user) {
-    return <Navigate to="/login" />;
-  }
-
-  if (!cargo) {
-    return <Navigate to="/verificacao" />;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(cargo)) {
-    return <h3>Acesso negado 🚫</h3>;
+    return <Navigate to="/login" replace />;
   }
 
   return children;
