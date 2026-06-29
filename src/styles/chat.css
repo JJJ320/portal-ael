@@ -1,0 +1,167 @@
+/* ===== CONTAINER PRINCIPAL ===== */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #0f1115;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+/* ===== ÁREA DAS MENSAGENS ===== */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  scroll-behavior: smooth;
+}
+
+/* ===== INPUT FIXO ===== */
+.chat-input-wrapper {
+  padding: 10px;
+  background: #161a22;
+  border-top: 1px solid #2a2f3a;
+}
+
+/* ===== MESSAGE LIST ===== */
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ===== MENSAGEM ===== */
+.message {
+  display: flex;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.message:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+/* AVATAR */
+.message-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* CONTEÚDO */
+.message-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* TOPO (nome, cargo, hora) */
+.message-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* NOME */
+.message-name {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+/* CARGO */
+.cargo {
+  font-size: 11px;
+  padding: 2px 6px;
+  border-radius: 5px;
+  text-transform: uppercase;
+}
+
+/* estilos de cargo */
+.cargo-aluno {
+  background: #2b6cff;
+  color: white;
+}
+
+.cargo-professor {
+  background: #ffb020;
+  color: black;
+}
+
+.cargo-admin {
+  background: #ff3b3b;
+  color: white;
+}
+
+/* HORA */
+.message-time {
+  font-size: 11px;
+  color: #888;
+}
+
+/* TEXTO */
+.message-text {
+  font-size: 14px;
+  color: #eaeaea;
+  line-height: 1.4;
+}
+
+/* IMAGEM */
+.message-image {
+  max-width: 300px;
+  border-radius: 10px;
+  margin-top: 5px;
+}
+
+/* VÍDEO */
+.message-video {
+  max-width: 300px;
+  border-radius: 10px;
+  margin-top: 5px;
+}
+
+/* ÁUDIO */
+.message-audio {
+  margin-top: 5px;
+}
+
+/* LINK ARQUIVO */
+.message-file {
+  color: #4da3ff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.message-file:hover {
+  text-decoration: underline;
+}
+
+/* INPUT */
+.chat-input {
+  display: flex;
+  gap: 10px;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  background: #222836;
+  color: white;
+}
+
+.chat-input button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 8px;
+  background: #2b6cff;
+  color: white;
+  cursor: pointer;
+}
+
+.chat-input button:hover {
+  background: #1f57d6;
+}
