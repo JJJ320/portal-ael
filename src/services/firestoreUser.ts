@@ -1,35 +1,60 @@
 import {
   doc,
-  getDoc,
   setDoc,
+  getDoc,
   updateDoc,
+  deleteDoc,
+  collection,
+  getDocs,
 } from "firebase/firestore";
+
 import { db } from "./firebase";
 
-export type Cargo = "aluno" | "lider" | "funcionario";
+export type Cargo =
+  | "aluno"
+  | "lider"
+  | "funcionario"
+  | null;
 
-export type UserData = {
+export interface UserData {
   uid: string;
   nome: string;
   email: string;
   foto: string;
   bio: string;
-  cargo: Cargo | null;
+  cargo: Cargo;
   verificado: boolean;
-};
-
-export async function createUser(data: UserData) {
-  await setDoc(doc(db, "users", data.uid), data);
 }
 
-export async function getUser(uid: string) {
-  const ref = doc(db, "users", uid);
-  const snap = await getDoc(ref);
+const usersCollection = collection(db, "users");
 
-  return snap.exists() ? (snap.data() as UserData) : null;
+export async function createUser(user: UserData) {
+  await setDoc(doc(usersCollection, user.uid), user);
 }
 
-export async function updateUser(uid: string, data: Partial<UserData>) {
-  const ref = doc(db, "users", uid);
-  await updateDoc(ref, data);
+export async function getUser(uid: string): Promise<UserData | null> {
+  const snapshot = await getDoc(doc(usersCollection, uid));
+
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return snapshot.data() as UserData;
+}
+
+export async function updateUser(
+  uid: string,
+  data: Partial<UserData>
+) {
+  await updateDoc(doc(usersCollection, uid), data);
+}
+
+export async function deleteUser(uid: string) {
+  await deleteDoc(doc(usersCollection, uid));
+}
+
+export async function getAllUsers(): Promise<UserData[]> {
+  const snapshot = await getDocs(usersCollection);
+
+  return snapshot.docs.map((doc) => doc.data() as UserData);
 }
