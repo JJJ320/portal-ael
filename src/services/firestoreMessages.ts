@@ -1,60 +1,31 @@
 import {
   collection,
   addDoc,
-  query,
- orderBy,
   onSnapshot,
-  serverTimestamp,
+  query,
+  orderBy,
 } from "firebase/firestore";
-
 import { db } from "./firebase";
 
-export interface MessageData {
-  id?: string;
-
-  canal: string;
-
-  uid: string;
-
+export type Message = {
   nome: string;
-
   foto: string;
-
-  texto: string;
-
+  cargo: string;
+  horario: number;
+  texto?: string;
   arquivo?: string;
-
   tipo?: string;
+};
 
-  criadoEm?: any;
+export function sendMessage(data: Message) {
+  return addDoc(collection(db, "messages"), data);
 }
 
-export async function sendMessage(
-  message: Omit<MessageData, "id" | "criadoEm">
-) {
-  await addDoc(collection(db, "messages"), {
-    ...message,
-    criadoEm: serverTimestamp(),
-  });
-}
+export function subscribeMessages(callback: (messages: Message[]) => void) {
+  const q = query(collection(db, "messages"), orderBy("horario", "asc"));
 
-export function listenMessages(
-  canal: string,
-  callback: (messages: MessageData[]) => void
-) {
-  const q = query(
-    collection(db, "messages"),
-    orderBy("criadoEm")
-  );
-
-  return onSnapshot(q, snapshot => {
-    const messages = snapshot.docs
-      .map(doc => ({
-        id: doc.id,
-        ...(doc.data() as Omit<MessageData, "id">),
-      }))
-      .filter(msg => msg.canal === canal);
-
+  return onSnapshot(q, (snapshot) => {
+    const messages = snapshot.docs.map((doc) => doc.data() as Message);
     callback(messages);
   });
 }

@@ -1,27 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
-import { db } from "../../firebase";
+import { useEffect, useState, useRef } from "react";
+import Message from "./Message";
 import type { MessageProps } from "./Message";
+import { subscribeMessages } from "../../services/firestoreMessages";
 
 export default function MessageList() {
   const [messages, setMessages] = useState<MessageProps[]>([]);
-  const bottomRef = useRef<HTMLDivElement | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const q = query(
-      collection(db, "messages"),
-      orderBy("horario", "asc")
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const msgs: MessageProps[] = snapshot.docs.map((doc) => ({
-        ...(doc.data() as MessageProps),
-      }));
-
-      setMessages(msgs);
-    });
-
-    return () => unsubscribe();
+    const unsub = subscribeMessages(setMessages);
+    return () => unsub();
   }, []);
 
   useEffect(() => {
@@ -30,12 +18,8 @@ export default function MessageList() {
 
   return (
     <div className="message-list">
-
-      {messages.map((msg, index) => (
-        <Message
-          key={index}
-          {...msg}
-        />
+      {messages.map((msg, i) => (
+        <Message key={i} {...msg} />
       ))}
 
       <div ref={bottomRef} />

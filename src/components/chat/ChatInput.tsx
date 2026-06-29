@@ -1,47 +1,35 @@
 import { useState } from "react";
-import { addDoc, collection } from "firebase/firestore";
-import { db } from "../../firebase";
+import { sendMessage } from "../../services/firestoreMessages";
 
 export default function ChatInput() {
   const [texto, setTexto] = useState("");
 
-  async function enviarMensagem() {
+  async function enviar() {
     if (!texto.trim()) return;
 
-    await addDoc(collection(db, "messages"), {
+    await sendMessage({
       nome: "Aluno",
       foto: "https://i.imgur.com/default.png",
       cargo: "Aluno",
       horario: Date.now(),
-      texto: texto,
+      texto,
       arquivo: "",
-      tipo: ""
+      tipo: "",
     });
 
     setTexto("");
   }
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      enviarMensagem();
-    }
-  }
-
   return (
     <div className="chat-input">
-
       <input
-        type="text"
-        placeholder="Digite sua mensagem..."
         value={texto}
         onChange={(e) => setTexto(e.target.value)}
-        onKeyDown={handleKeyDown}
+        onKeyDown={(e) => e.key === "Enter" && enviar()}
+        placeholder="Digite sua mensagem..."
       />
 
-      <button onClick={enviarMensagem}>
-        Enviar
-      </button>
-
+      <button onClick={enviar}>Enviar</button>
     </div>
   );
 }
